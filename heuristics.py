@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 from read import read
+import time
 
 #takes in state matrix and goal matrix, checks the location of the boxes in
 #state matrix with corresponding location in goals matrix, only counts when
@@ -42,10 +43,15 @@ def manhattan(state, goals):
 
 
 def main():
-    test_m, test_g = read()
+    start_time = time.time()
+
+    test_m, test_g, _ = read()
 
     print(boxes(test_m, test_g))
     print(manhattan(test_m,test_g))
 
+    print("--- %s seconds ---" % (time.time() - start_time))
+
 if __name__ == "__main__":
+
     main()

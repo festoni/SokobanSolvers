@@ -2,6 +2,7 @@
 
 from read import read
 from copy import deepcopy
+import time
 
 #find the position of player in state matrix
 def plyr_pos(state):
@@ -102,7 +103,8 @@ def neighbors(state):
 
 
 def main():
-    test, _ = read()
+    start_time = time.time()
+    test, _, _ = read()
 
     for row in test:
         print(row)
@@ -112,6 +114,8 @@ def main():
         for row in mtx:
             print(row)
         print()
+
+    print("--- %s seconds ---" % (time.time() - start_time))
 
 if __name__ == "__main__":
     main()

@@ -38,7 +38,7 @@ def read():
         if len(line) > length:
             length = len(line)
     #if input was entered as stdin instead of argument, decrement desired length
-    if '\r' in encoding:                            #takes care of added 'r'-s 
+    if '\r' in encoding:                            #takes care of added 'r'-s
         length -= 1
 
     #preprocess the input (remove blocks outside area of interest)
@@ -51,6 +51,7 @@ def read():
     #initialize state matrix to all 0s, and goals matrix to all False
     state = [[0 for i in range(cols)] for u in range(rows)]
     goals = [[False for i in range(cols)] for u in range(rows)]
+    walls = [[False for i in range(cols)] for u in range(rows)]
 
     j, k = 0, 0                         #pointers to entries of states matricies
     for idx, ltr in enumerate(proc_state):
@@ -61,6 +62,7 @@ def read():
             k = 0                       #set pointer to first column of matrix
         elif ltr == '#':                #walls
             state[j][k] = 3
+            walls[j][k] = True
             k += 1
         elif ltr == '$':                #box
             state[j][k] = 1
@@ -80,13 +82,13 @@ def read():
             goals[j][k] = True
             k += 1
 
-    return state, goals
+    return state, goals, walls
 
 
 def main():
     start_time = time.time()
 
-    state, goals = read()
+    state, goals, _ = read()
 
     #print state matrix and goal matrix
     for row in state:
