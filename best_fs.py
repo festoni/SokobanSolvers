@@ -1,6 +1,7 @@
 #!/usr/env/bin python3
-import time, heapq
-import rank_unrank, read
+from time import time
+from heapq import heappush, heappop
+from read import read
 from rank_unrank import rank, unrank, to_perm, to_matrix, get_info
 from mechanics import neighbors, is_goal
 from heuristics import boxes, manhattan
@@ -12,21 +13,21 @@ from heuristics import boxes, manhattan
 #return the path to the solution if any exists, otherwise None
 def best_fs(start, goals, walls, heuristic, verbose=False):
     frontier = []                               #initialize frontier
-    heapq.heappush(frontier, (0, [start]))      #push tuple (0, start_matrix)
+    heappush(frontier, (0, [start]))      #push tuple (0, start_matrix)
     while frontier:
-        path_tup = heapq.heappop(frontier)      #take first tuple in frontier
+        path_tup = heappop(frontier)      #take first tuple in frontier
         last_vertex = path_tup[1][-1]           #set equal to matrix in tuple
         if is_goal(last_vertex, goals):         #if boxes match goals, return
             if verbose:
                 print(path_tup[1])
-            print("length:\t", len(path_tup[1]))    #print soln length
+            print("length\t:", len(path_tup[1]))    #print soln length
             return path_tup
         for next_matrix in neighbors(last_vertex):  #for all neighbors of matrix
             next_cost = heuristic(next_matrix, goals)   #calculate future cost
             if next_matrix in path_tup[1]:          #don't run into a cycle
                 continue
             new_tup = (next_cost, path_tup[1] + [next_matrix])
-            heapq.heappush(frontier, new_tup)       #prioritize by future cost
+            heappush(frontier, new_tup)       #prioritize by future cost
     return None
 
 #BEST FIRST SEARCH with pruning
@@ -47,13 +48,13 @@ def best_fs2(start, goals, walls, heuristic, verbose=False):
     start_int = rank(start_perm, max_pot, length, type_count)
 
     frontier = []                                   #initialize frontier
-    heapq.heappush(frontier, (0,[start_int]))       #add (0, int) tuple
+    heappush(frontier, (0,[start_int]))       #add (0, int) tuple
 
     is_visited = [False for i in range(max_pot)]    #initialize visited array
     is_visited[start_int] = True                    #mark start as visited
 
     while frontier:
-        path_tup = heapq.heappop(frontier)  #take first path tuple from frontier
+        path_tup = heappop(frontier)  #take first path tuple from frontier
         last_vertex = path_tup[1][-1]       #take last element of path in tuple
 
         #unrank to multiset, and convert to matrix to check for goal and neighbs
@@ -63,7 +64,7 @@ def best_fs2(start, goals, walls, heuristic, verbose=False):
         if is_goal(last_matrix, goals):     #if boxes match goals, return soln
             if verbose:                     #if asked, print solution path
                 print(path_tup[1])
-            print("length:\t", len(path_tup[1]))    #print length of solution
+            print("length\t:", len(path_tup[1]))    #print length of solution
             return path_tup
         for next_matrix in neighbors(last_matrix):  #for each neighbor
             next_cost = heuristic(next_matrix, goals)   #calculate future cost
@@ -77,18 +78,18 @@ def best_fs2(start, goals, walls, heuristic, verbose=False):
 
             new_tup = (next_cost, path_tup[1] + [int_next])
             is_visited[int_next] = True
-            heapq.heappush(frontier, new_tup)
+            heappush(frontier, new_tup)
     return None
 
 
 def main():
-    start_time = time.time()
+    start_time = time()
 
-    test, goals, walls = read.read()
-    best_fs(test, goals, walls, manhattan)
-    best_fs2(test, goals, walls, manhattan)
+    test, goals, walls = read()
+    best_fs(test, goals, walls, manhattan)      #no pruning
+    best_fs2(test, goals, walls, manhattan)     #with pruning
 
-    print("--- %s seconds ---" % (time.time() - start_time))
+    print("--- %s seconds ---" % (time() - start_time))
 
 if __name__ == "__main__":
     main()
