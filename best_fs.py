@@ -48,13 +48,13 @@ def best_fs2(start, goals, walls, heuristic, verbose=False):
     start_int = rank(start_perm, max_pot, length, type_count)
 
     frontier = []                                   #initialize frontier
-    heappush(frontier, (0,[start_int]))       #add (0, int) tuple
+    heappush(frontier, (0,[start_int]))             #add (0, int) tuple
 
     is_visited = [False for i in range(max_pot)]    #initialize visited array
     is_visited[start_int] = True                    #mark start as visited
 
     while frontier:
-        path_tup = heappop(frontier)  #take first path tuple from frontier
+        path_tup = heappop(frontier)        #take first path tuple from frontier
         last_vertex = path_tup[1][-1]       #take last element of path in tuple
 
         #unrank to multiset, and convert to matrix to check for goal and neighbs
@@ -86,7 +86,7 @@ def main():
     start_time = time()
 
     test, goals, walls = read()
-    best_fs(test, goals, walls, manhattan)      #no pruning
+    # best_fs(test, goals, walls, manhattan)      #no pruning
     best_fs2(test, goals, walls, manhattan)     #with pruning
 
     print("--- %s seconds ---" % (time() - start_time))
