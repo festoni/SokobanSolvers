@@ -17,6 +17,8 @@ def can_left(state, j, k):
         return False
     if state[j][k-1] == 0:                      #if blank space ahead
         return True
+    if k == 1:                                  #if wall follows box
+        return False
     if state[j][k-1] == 1 and state[j][k-2] == 0:   #if blank space follows box
         return True
     return False                                #all other cases
@@ -27,6 +29,8 @@ def can_right(state, j, k):
         return False
     if state[j][k+1] == 0:                      #if blank space ahead
         return True
+    if k == len(state[0])-2:                    #if wall follows box
+        return False
     if state[j][k+1] == 1 and state[j][k+2] == 0:   #if blank space follows box
         return True
     return False                                #all other cases
@@ -37,6 +41,8 @@ def can_up(state, j, k):
         return False
     if state[j-1][k] == 0:                      #if blank space ahead
         return True
+    if j == 1:                                  #if wall follows box
+        return False
     if state[j-1][k] == 1 and state[j-2][k] == 0:   #if blank space follows box
         return True
     return False                                #all other cases
@@ -47,6 +53,8 @@ def can_down(state, j, k):
         return False
     if state[j+1][k] == 0:                      #if blank space ahead
         return True
+    if j == len(state)-2:                       #if wall follows space
+        return False
     if state[j+1][k] == 1 and state[j+2][k] == 0:   #if blank space follows box
         return True
     return False                                #all other cases
@@ -84,22 +92,26 @@ def neighbors(state):
     j, k = plyr_pos(state)
     neighbors_l = []
     if can_left(state, j, k):                   #if allowd to move left
-        print("left")
         temp = deepcopy(state)
         neighbors_l.append(mv_left(temp, j, k))
     if can_right(state, j, k):                #if allowd to move right
-        print("right")
         temp = deepcopy(state)
         neighbors_l.append(mv_right(temp, j, k))
     if can_up(state, j, k):                   #if allowed to move up
-        print("up")
         temp = deepcopy(state)
         neighbors_l.append(mv_up(temp, j, k))
     if can_down(state, j, k):                 #if allowed tdo move down
-        print("down")
         temp = deepcopy(state)
         neighbors_l.append(mv_down(temp, j, k))
     return neighbors_l
+
+def is_goal(state, goals):
+    for j in range(len(state)):             #check all the matrix for boxes
+        for k in range(len(state[0])):
+            if state[j][k] == 1:            #for each location of a box
+                if goals[j][k] == False:    #check the corresp goal location
+                    return False            #return false if a box is unmatched
+    return True                             #return true if all boxes matched
 
 
 def main():
@@ -108,6 +120,7 @@ def main():
 
     for row in test:
         print(row)
+    print()
 
     neighbs = neighbors(test)
     for mtx in neighbs:
