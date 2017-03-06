@@ -60,49 +60,81 @@ def can_down(state, j, k):
     return False                                #all other cases
 
 #move to the left and return matrix
-def mv_left(state, j, k):
+def mv_left(state, j, k, with_cost=False):
+    cost = 0
     if state[j][k-1] == 1:          #if box ahead, push box in blank position
         state[j][k-1], state[j][k-2] = state[j][k-2], state[j][k-1]
+        cost += 1
     state[j][k], state[j][k-1] = state[j][k-1], state[j][k]    #move player fwd
-    return state
+    if with_cost == False:
+        return state
+    else:
+        return cost, state
 
 #move to the right and return matrix
-def mv_right(state, j, k):
+def mv_right(state, j, k, with_cost=False):
+    cost = 0
     if state[j][k+1] == 1:          #if box ahead, push box in blank position
         state[j][k+1], state[j][k+2] = state[j][k+2], state[j][k+1]
+        cost += 1
     state[j][k], state[j][k+1] = state[j][k+1], state[j][k]    #move player fwd
-    return state
+    if with_cost == False:
+        return state
+    else:
+        return cost, state
 
 #move up and return matrix
-def mv_up(state, j, k):
+def mv_up(state, j, k, with_cost=False):
+    cost = 0
     if state[j-1][k] == 1:          #if box ahead, push box in blank position
         state[j-1][k], state[j-2][k] = state[j-2][k], state[j-1][k]
+        cost += 1
     state[j][k], state[j-1][k] = state[j-1][k], state[j][k]    #move player fwd
-    return state
+    if with_cost == False:
+        return state
+    else:
+        return cost, state
 
 #move down and return matrix
-def mv_down(state, j, k):
+def mv_down(state, j, k, with_cost=False):
+    cost = 0
     if state[j+1][k] == 1:          #if box ahead, push box in blank position
         state[j+1][k], state[j+2][k] = state[j+2][k], state[j+1][k]
+        cost += 1
     state[j][k], state[j+1][k] = state[j+1][k], state[j][k]    #move player fwd
-    return state
+    if with_cost == False:
+        return state
+    else:
+        return cost, state
 
 #takes in current state and returns the list of valid neighbors
-def neighbors(state):
+def neighbors(state, with_cost=False):
     j, k = plyr_pos(state)
     neighbors_l = []
     if can_left(state, j, k):                   #if allowd to move left
         temp = deepcopy(state)
-        neighbors_l.append(mv_left(temp, j, k))
+        if with_cost == False:
+            neighbors_l.append(mv_left(temp, j, k))
+        else:
+            neighbors_l.append(mv_left(temp, j, k, with_cost=True))
     if can_right(state, j, k):                #if allowd to move right
         temp = deepcopy(state)
-        neighbors_l.append(mv_right(temp, j, k))
+        if with_cost == False:
+            neighbors_l.append(mv_right(temp, j, k))
+        else:
+            neighbors_l.append(mv_right(temp, j, k, with_cost=True))
     if can_up(state, j, k):                   #if allowed to move up
         temp = deepcopy(state)
-        neighbors_l.append(mv_up(temp, j, k))
+        if with_cost == False:
+            neighbors_l.append(mv_up(temp, j, k))
+        else:
+            neighbors_l.append(mv_up(temp, j, k, with_cost=True))
     if can_down(state, j, k):                 #if allowed tdo move down
         temp = deepcopy(state)
-        neighbors_l.append(mv_down(temp, j, k))
+        if with_cost == False:
+            neighbors_l.append(mv_down(temp, j, k))
+        else:
+            neighbors_l.append(mv_down(temp, j, k, with_cost=True))
     return neighbors_l
 
 def is_goal(state, goals):
