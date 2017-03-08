@@ -13,28 +13,29 @@ from heuristics import boxes, manhattan
 def Astar(start, goals, walls, heuristic, verbose=False):
     #frontier will look like [(f(path), [path]), (f(path), [path]), ...]
     frontier = []
-    heappush(frontier, (0, [start]))    #heap prioritized by f()
+    heappush(frontier, (0, 0, [start]))    #heap prioritized by f()
 
     while frontier:
         path_tup = heappop(frontier)    #select first tuple from frontier
 
         # last_vertex is last elem in path from current path tuple
-        last_vertex = path_tup[1][-1]
+        last_vertex = path_tup[2][-1]
         if is_goal(last_vertex, goals):
             if verbose:                 #if asked by user, print solution path
-                for matrices in path_tup[1]:
+                for matrices in path_tup[2]:
                     for line in matrices:
                         print(line)
                     print()
-            print("cost\t:", path_tup[0])   #print cost for convinience
-            print("length\t:", len(path_tup[1])) #print length for convinience
+            print("cost\t:", path_tup[1])   #print cost for convinience
+            print("length\t:", len(path_tup[2])) #print length for convinience
             return path_tup
         for next_tup in neighbors(last_vertex, with_cost=True): #for each neighb
             future_cost = heuristic(next_tup[1], goals) #calculate future cost
-            if next_tup[1] in path_tup[1]:              #avoid cycles
+            if next_tup[1] in path_tup[2]:              #avoid cycles
                 continue
+            new_cost = path_tup[1] + next_tup[0]
             combined_cost = next_tup[0] + future_cost   #calculate f()
-            new_tup = (path_tup[0] + combined_cost, path_tup[1] + [next_tup[1]])
+            new_tup = (combined_cost, new_cost, path_tup[2] + [next_tup[1]])
             heappush(frontier, new_tup)                 #prioritize by f()
     return None
 
@@ -56,14 +57,14 @@ def Astar2(start, goals, walls, heuristic, verbose=False):
     start_int = rank(start_perm, max_pot, length, type_count)
 
     frontier = []                               #initiliaze frontier
-    heappush(frontier, (0,[start_int]))         #add (0, index) tuple
+    heappush(frontier, (0, 0,[start_int]))         #add (0, 0, index) tuple
 
     is_visited = [False for i in range(max_pot)]    #initiliaze visited array
     is_visited[start_int] = True                    #mark start as visited
 
     while frontier:
         path_tup = heappop(frontier)            #take first path tuple
-        last_vertex = path_tup[1][-1]           #take last element of path
+        last_vertex = path_tup[2][-1]           #take last element of path
 
         #unrank to multiset, and convert to matrix to check for goal and neighbs
         last_permut = unrank(last_vertex, max_pot, length, type_count)
@@ -71,9 +72,9 @@ def Astar2(start, goals, walls, heuristic, verbose=False):
 
         if is_goal(last_matrix, goals):         #if boxes match goals, finish
             if verbose:                         #if asked print solution path
-                print(path_tup[1])
-            print("cost\t:", path_tup[0])       #print cost for convinience
-            print("length\t:", len(path_tup[1]))    #print length for conv
+                print(path_tup[2])
+            print("cost\t:", path_tup[1])       #print cost for convinience
+            print("length\t:", len(path_tup[2]))    #print length for conv
             return path_tup
         for next_tup in neighbors(last_matrix, with_cost=True): #for each neighb
             future_cost = heuristic(next_tup[1], goals) #calculate future cost
@@ -85,9 +86,9 @@ def Astar2(start, goals, walls, heuristic, verbose=False):
             if is_visited[int_next]:            #if already visited skip
                 continue
 
-
-            combined_cost = next_tup[0] + future_cost   #calculate f()
-            new_tup = (path_tup[0] + combined_cost, path_tup[1] + [int_next])
+            new_cost = path_tup[1] + next_tup[0]    #add cost of new vertex
+            combined_cost = new_cost + future_cost   #calculate f()
+            new_tup = (combined_cost, new_cost, path_tup[2] + [int_next])
             is_visited[int_next] = True                 #set new int to visited
             heappush(frontier, new_tup)                 #prioritize by f()
     return None
@@ -97,8 +98,8 @@ def main():
     start_time = time()
 
     test, goals, walls = read()
-    Astar(test, goals, walls, manhattan)        #no pruning
-    Astar2(test, goals, walls, manhattan)       #with pruning
+    # Astar(test, goals, walls, manhattan)        #no pruning
+    Astar2(test, goals, walls, boxes)       #with pruning
 
 
     print("--- %s seconds ---" % (time() - start_time))

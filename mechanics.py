@@ -61,10 +61,9 @@ def can_down(state, j, k):
 
 #move to the left and return matrix
 def mv_left(state, j, k, with_cost=False):
-    cost = 0
+    cost = 1
     if state[j][k-1] == 1:          #if box ahead, push box in blank position
         state[j][k-1], state[j][k-2] = state[j][k-2], state[j][k-1]
-        cost += 1
     state[j][k], state[j][k-1] = state[j][k-1], state[j][k]    #move player fwd
     if with_cost == False:
         return state
@@ -73,10 +72,9 @@ def mv_left(state, j, k, with_cost=False):
 
 #move to the right and return matrix
 def mv_right(state, j, k, with_cost=False):
-    cost = 0
+    cost = 1
     if state[j][k+1] == 1:          #if box ahead, push box in blank position
         state[j][k+1], state[j][k+2] = state[j][k+2], state[j][k+1]
-        cost += 1
     state[j][k], state[j][k+1] = state[j][k+1], state[j][k]    #move player fwd
     if with_cost == False:
         return state
@@ -85,10 +83,9 @@ def mv_right(state, j, k, with_cost=False):
 
 #move up and return matrix
 def mv_up(state, j, k, with_cost=False):
-    cost = 0
+    cost = 1
     if state[j-1][k] == 1:          #if box ahead, push box in blank position
         state[j-1][k], state[j-2][k] = state[j-2][k], state[j-1][k]
-        cost += 1
     state[j][k], state[j-1][k] = state[j-1][k], state[j][k]    #move player fwd
     if with_cost == False:
         return state
@@ -97,10 +94,9 @@ def mv_up(state, j, k, with_cost=False):
 
 #move down and return matrix
 def mv_down(state, j, k, with_cost=False):
-    cost = 0
+    cost = 1
     if state[j+1][k] == 1:          #if box ahead, push box in blank position
         state[j+1][k], state[j+2][k] = state[j+2][k], state[j+1][k]
-        cost += 1
     state[j][k], state[j+1][k] = state[j+1][k], state[j][k]    #move player fwd
     if with_cost == False:
         return state
