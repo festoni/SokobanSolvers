@@ -2,6 +2,8 @@
 
 from read import read
 import time
+from math import inf
+from refinements import is_cornered
 
 #takes in state matrix and goal matrix, checks the location of the boxes in
 #state matrix with corresponding location in goals matrix, only counts when
@@ -11,10 +13,13 @@ def boxes(state, goals):
     for j in range(len(state)):             #check all the matrix for boxes
         for k in range(len(state[0])):
             if state[j][k] == 1:            #record the locations of all boxes
+                if is_cornered(state, goals, j, k):
+                    return inf
                 boxes.append((j, k))
+
     unmatch = 0
-    for v in boxes:                         #check each box location if on goal
-        if not goals[v[0]][v[1]]:           #if box not on goal, increment count
+    for j, k in boxes:                         #check each box location if on goal
+        if not goals[j][k]:           #if box not on goal, increment count
             unmatch += 1
     return unmatch                          #return number of unmatched goals
 
@@ -23,6 +28,8 @@ def manhattan(state, goals):
     for j in range(len(state)):             #check all the matrix for boxes
         for k in range(len(state[0])):
             if state[j][k] == 1:            #record the locations of all boxes
+                if is_cornered(state, goals, j, k):
+                    return inf
                 boxes.append((j, k))
 
     goals_l = []
