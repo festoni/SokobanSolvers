@@ -7,7 +7,15 @@ from mechanics import neighbors, is_goal
 from heuristics import boxes, manhattan
 from math import inf
 
-def b_bound1(start, goals, walls, heuristic,bnd=inf,cornered=True, verbose=False):
+'''
+>>Branch and bound<<
+Input: start matrix, goals matrix, walls matrix, heuristic, [bound], [cornered],
+[verbose]
+Output: solution path
+Branch and bound can be used to find the minmal cost solution, but in the case
+of Sokoban it seems better to return the shortest path.
+'''
+def b_bound(start, goals, walls, heuristic,bnd=inf,cornered=True, verbose=False):
 
     soln = []
     bound = bnd
@@ -38,6 +46,14 @@ def b_bound1(start, goals, walls, heuristic,bnd=inf,cornered=True, verbose=False
     print("length\t:", len(soln)-1)
     return soln
 
+'''
+>>Branch and bound (rank/unrank, no pruning)<<
+Input: start matrix, goals matrix, walls matrix, heuristic, [bound], [cornered],
+[verbose]
+Output: solution path
+Branch and bound can be used to find the minmal cost solution, but in the case
+of Sokoban it seems better to return the shortest path.
+'''
 def b_bound2(start, goals, walls, heuristic, bnd=inf, cornered=True, verbose=False):
 
     soln = []
@@ -83,7 +99,7 @@ def main():
     start_time = time()
 
     test, goals, walls, _, _ = read()
-    b_bound1(test, goals, walls, manhattan) #without pruning
+    b_bound(test, goals, walls, manhattan) #without pruning
     # b_bound2(test, goals, walls, manhattan) #with pruning
 
     print("--- %s seconds ---" % (time() - start_time))
