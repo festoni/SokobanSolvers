@@ -2,6 +2,7 @@
 import fileinput, time
 
 '''
+>>Preprocess<<
 Input: original input, length of longest line in input
 Output: truncated input
 Truncate input by removing the first column and the last overall column.
@@ -20,11 +21,33 @@ def preprocess(encoding, length):
             updated += line[1:length-2] + "\n"      #truncate '#\n' then add \n
     return updated
 
+'''
+>>Update list<<
+Input: list of length 4, x index of matrix, y index of matrix, # rows, # cols
+Output: updated list of length 4
+This function takes in a list of length 4, where ls[0] corresponds to topmost
+row, ls[1] to leftmost column, ls[2] to bottom most row, and ls[3] to
+rightmost column. Is is only called when a box or goal is found is one of these
+borders. And it will update the index of the list in which the indices are in.
+Used only for the is_stuck refinement.
+'''
+def update_ls(ls, j, k, rows, cols):
+    if j == 0:
+        ls[0] += 1
+    elif j == rows-1:
+        ls[2] += 1
+    if k == 0:
+        ls[1] += 1
+    elif k == cols-1:
+        ls[3] += 1
+    return ls
 
 '''
+>> Read <<
 Input: STDIN or Argument
-Output: State matrix and Goals boolean matrix
-Takes in input through STDIN or as argument, and gets rid of all the block not
+Output: State matrix, goals boolean matrix, walls boolean matrix, list of boxes
+in borders, and list of goals in borders
+Takes in input through STDIN or as argument, and gets rid of all the blocks not
 in area of interest. Then it reads each character one by one, and sets the
 corresponding entries in a state matrix. Goals are kept as spaces in state
 matrix and are set as True in goals matrix.
@@ -53,6 +76,9 @@ def read():
     goals = [[False for i in range(cols)] for u in range(rows)]
     walls = [[False for i in range(cols)] for u in range(rows)]
 
+    goals_ls = [0]*4       #[top row, left column, bottom row, right column]
+    boxes_ls = [0]*4       #[top row, left column, bottom row, right column]
+
     j, k = 0, 0                         #pointers to entries of states matricies
     for idx, ltr in enumerate(proc_state):
         if ltr == ' ':                  #floor
@@ -66,10 +92,16 @@ def read():
             k += 1
         elif ltr == '$':                #box
             state[j][k] = 1
+            temp = boxes_ls[:]
+            boxes_ls = update_ls(temp, j, k, rows, cols)    #update boxes list
             k += 1
         elif ltr == '*':                #box on goal
             state[j][k] = 1             #set state matrix entry to 1
             goals[j][k] = True          #set goals matrix entry to True
+            temp = goals_ls[:]
+            goals_ls = update_ls(temp, j, k, rows, cols)    #update goals list
+            temp = boxes_ls[:]
+            boxes_ls = update_ls(temp, j, k, rows, cols)    #update boxes list
             k += 1
         elif ltr == '@':                #player
             state[j][k] = 2
@@ -77,20 +109,23 @@ def read():
         elif ltr == '+':                #player on goal
             state[j][k] = 2             #set state matrix entry to 2
             goals[j][k] = True          #set goals matrix entry to True
+            temp = goals_ls[:]
+            goals_ls = update_ls(temp, j, k, rows, cols)    #update goals list
             k += 1
         elif ltr == '.':                #goal
             goals[j][k] = True
+            temp = goals_ls[:]
+            goals_ls = update_ls(temp, j, k, rows, cols)    #update goals list
             k += 1
 
-    return state, goals, walls
+    return state, goals, walls, goals_ls, boxes_ls
 
 
 def main():
     start_time = time.time()
 
-    state, goals, _ = read()
+    state, goals, _, _, _ = read()
 
-    #print state matrix and goal matrix
     for row in state:
         print(row)
     for row in goals:
