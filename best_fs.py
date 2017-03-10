@@ -6,46 +6,48 @@ from rank_unrank import rank, unrank, to_perm, to_matrix, get_info
 from mechanics import neighbors, is_goal
 from heuristics import boxes, manhattan
 
-
-#BEST FIRST SEARCH without pruning
-#takes in start matrix, goals matrix, walls matrix, heuristic function, and
-#verbose boolean whether to print solution path or next_cost
-#return the path to the solution if any exists, otherwise None
-def best_fs(start, goals, walls, heuristic, verbose=False):
+'''
+>>Best First Search without pruning<<
+Input: start matrix, goals matrix, walls matrix, heuristic function, boolean
+whether to use corner checking, and verbose boolean whether to print solution
+path
+Output: Solution path, otherwise None
+'''
+def best_fs(start, goals, walls, heuristic, cornered=True, verbose=False):
+    #frontier will look like [f(path), cost(path), [path], ...]
     frontier = []                               #initialize frontier
-    heappush(frontier, (0, [start]))      #push tuple (0, start_matrix)
+    heappush(frontier, (0, [start]))            #push tuple (0, start_matrix)
     while frontier:
-        path_tup = heappop(frontier)      #take first tuple in frontier
+        path_tup = heappop(frontier)            #take first tuple in frontier
         last_vertex = path_tup[1][-1]           #set equal to matrix in tuple
         if is_goal(last_vertex, goals):         #if boxes match goals, return
             if verbose:
                 print(path_tup[1])
-            print("length\t:", len(path_tup[1]))    #print soln length
+            print("length\t:", len(path_tup[1])-1)      #print soln length
             return path_tup
-        for next_matrix in neighbors(last_vertex):  #for all neighbors of matrix
-            next_cost = heuristic(next_matrix, goals)   #calculate future cost
-            if next_matrix in path_tup[1]:          #don't run into a cycle
+        for next_matrix, _ in neighbors(last_vertex):   #for each neighbor
+
+            #calculate future cost
+            next_cost = heuristic(next_matrix, goals, corn=cornered)
+            if next_matrix in path_tup[1]:              #don't run into a cycle
                 continue
             new_tup = (next_cost, path_tup[1] + [next_matrix])
             heappush(frontier, new_tup)       #prioritize by future cost
     return None
 
-#BEST FIRST SEARCH with pruning
-#takes in start matrix, goals matrix, walls matrix, heuristic function, and
-#verbose boolean whether to print solution path or next_cost
-#return the path to the solution if any exists, otherwise None
-def best_fs2(start, goals, walls, heuristic, verbose=False):
+'''
+>>Best First Search with pruning<<
+Input: start matrix, goals matrix, walls matrix, heuristic function, boolean
+whether to use corner checking, and verbose boolean whether to print solution
+path
+Output: Solution path, otherwise None
+'''
+def best_fs2(start, goals, walls, heuristic, cornered=True, verbose=False):
 
-    #find permutation of start matrix and get information that is used in
-    #ranking and unranking
-    #max_pot is the total number of permutations for this multiset
-    #length is the length of the multiset
-    #type_count is a list of counts for each type in the sorted multiset
     start_perm = to_perm(start)      #find permut of start matrix
     max_pot, length, type_count = get_info(start_perm) #get level info
 
-    #get the rank of the start matrix
-    start_int = rank(start_perm, max_pot, length, type_count)
+    start_int = rank(start_perm, max_pot, length, type_count)   #get rank index
 
     frontier = []                                   #initialize frontier
     heappush(frontier, (0,[start_int]))             #add (0, int) tuple
@@ -64,10 +66,12 @@ def best_fs2(start, goals, walls, heuristic, verbose=False):
         if is_goal(last_matrix, goals):     #if boxes match goals, return soln
             if verbose:                     #if asked, print solution path
                 print(path_tup[1])
-            print("length\t:", len(path_tup[1]))    #print length of solution
+            print("length\t:", len(path_tup[1])-1)      #print length of soln
             return path_tup
-        for next_matrix in neighbors(last_matrix):  #for each neighbor
-            next_cost = heuristic(next_matrix, goals)   #calculate future cost
+        for next_matrix, _ in neighbors(last_matrix):   #for each neighbor
+
+            #calculate future cost
+            next_cost = heuristic(next_matrix, goals, corn=True)
 
             #convert from matrix to permutation, then to index
             temp_perm = to_perm(next_matrix)            #conv to permutation
@@ -85,9 +89,9 @@ def best_fs2(start, goals, walls, heuristic, verbose=False):
 def main():
     start_time = time()
 
-    test, goals, walls = read()
+    test, goals, walls, _, _ = read()
     # best_fs(test, goals, walls, manhattan)      #no pruning
-    best_fs2(test, goals, walls, boxes)     #with pruning
+    best_fs2(test, goals, walls, manhattan)     #with pruning
 
     print("--- %s seconds ---" % (time() - start_time))
 
