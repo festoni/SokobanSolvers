@@ -90,8 +90,8 @@ def main():
     start_time = time()
 
     test, goals, walls, _, _ = read()
-    # best_fs(test, goals, walls, manhattan)      #no pruning
-    best_fs2(test, goals, walls, manhattan)     #with pruning
+    # best_fs(test, goals, walls, manhattan, cornered=False)      #no pruning
+    best_fs2(test, goals, walls, boxes)     #with pruning
 
     print("--- %s seconds ---" % (time() - start_time))
 

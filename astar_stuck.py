@@ -8,6 +8,53 @@ from heuristics import boxes, manhattan
 from refinements import is_stuck
 from math import inf
 
+
+'''
+>>A* search without pruning and with is_stuck check<<
+Input: start matrix, goals matrix, walls matrix, heuristic function, list of
+number of boxes in each border [top, left, bottom, right], list of number of
+goals in each border, and verbose boolean whether to print solution path
+Output: Solution path, otherwise None
+The way is_stuck works is, the lists of goals and boxes in each border are
+taken from the read function, and for every neighbor, if a box is pushed into
+one of the borders then is_stuck updates the boxes in border list for that
+neighbor. It then check if the number of boxes in border passes the number of
+goals in that same border, and returns True, which is followed by assigning
+infinity as the heuristic to that state.
+'''
+def Astar_stuck(start, goals, walls, heuristic, box_ls, goal_ls, verbose=False):
+    frontier = []
+    heappush(frontier, (0, 0,[start], box_ls))
+
+    while frontier:
+        path_tup = heappop(frontier)
+        last_matrix = path_tup[2][-1]
+
+        if is_goal(last_matrix, goals):
+            if verbose:
+                for matrices in path_tup[2]:
+                    for line in matrices:
+                        print(line)
+                    print()
+            print("cost\t:", path_tup[1])
+            print("length\t:", len(path_tup[2])-1)
+            return path_tup[2]
+        for next_tup in neighbors(last_matrix, with_cost=True):
+            ls = path_tup[3]
+            check, ls = is_stuck(goal_ls, ls[:], next_tup[-1])
+            if check:                       #if in a stuck state
+                future_cost = inf
+            else:                           #if not in a stuck state
+                future_cost = heuristic(next_tup[1], goals, corn=False)
+
+            if next_tup[1] in path_tup[2]:
+                continue
+            new_cost = path_tup[1] + next_tup[0]
+            combined_cost = new_cost + future_cost
+            new_tup = (combined_cost, new_cost, path_tup[2] + [next_tup[1]], ls)
+            heappush(frontier, new_tup)
+    return None
+
 '''
 >>A* search with pruning and with is_stuck check<<
 Input: start matrix, goals matrix, walls matrix, heuristic function, list of
@@ -19,9 +66,9 @@ taken from the read function, and for every neighbor, if a box is pushed into
 one of the borders then is_stuck updates the boxes in border list for that
 neighbor. It then check if the number of boxes in border passes the number of
 goals in that same border, and returns True, which is followed by assigning
-infinity as the heuristic to that state. 
+infinity as the heuristic to that state.
 '''
-def Astar_stuck(start, goals, walls, heuristic, box_ls, goal_ls, verbose=False):
+def Astar_stuck2(start, goals, walls, heuristic, box_ls, goal_ls, verbose=False):
 
     start_perm = to_perm(start)                      #find perm of start matrix
     max_pot, length, type_count = get_info(start_perm)  #get level info
@@ -78,7 +125,8 @@ def main():
     start_time = time()
 
     test, goals, walls, ls1, ls2  = read()
-    Astar_stuck(test, goals, walls, manhattan, ls1, ls2)       #with pruning
+    # Astar_stuck(test, goals, walls, manhattan, ls1, ls2)       #without pruning
+    Astar_stuck2(test, goals, walls, manhattan, ls1, ls2)       #with pruning
 
     print("--- %s seconds ---" % (time() - start_time))
 

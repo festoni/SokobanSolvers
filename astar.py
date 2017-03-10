@@ -39,7 +39,7 @@ def a_star(start, goals, walls, heuristic, cornered=True, verbose=False):
             if next_tup[1] in path_tup[2]:              #avoid cycles
                 continue
             new_cost = path_tup[1] + next_tup[0]        #add cost of new node
-            combined_cost = next_tup[0] + future_cost   #calculate f()
+            combined_cost = new_cost + future_cost   #calculate f()
             new_tup = (combined_cost, new_cost, path_tup[2] + [next_tup[1]])
             heappush(frontier, new_tup)                 #prioritize by f()
     return None
@@ -103,8 +103,8 @@ def main():
     start_time = time()
 
     test, goals, walls, _, _  = read()
-    # a_star(test, goals, walls, manhattan)        #no pruning
-    a_star2(test, goals, walls, manhattan)       #with pruning
+    # a_star(test, goals, walls, manhattan, cornered=True)        #no pruning
+    a_star2(test, goals, walls, manhattan, cornered=True)       #with pruning
 
 
     print("--- %s seconds ---" % (time() - start_time))
