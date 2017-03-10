@@ -8,27 +8,40 @@ from refinements import is_cornered
 #takes in state matrix and goal matrix, checks the location of the boxes in
 #state matrix with corresponding location in goals matrix, only counts when
 #corresponding value in goals matrix is False, returns the unmatched boxes count
-def boxes(state, goals):
+'''
+>>Number of unmaxed boxes<<
+Input: State matrix and goal matrix, boolean whether to use is_cornered refine
+Output: Number of unmatched boxes
+The function checks the location of the boxes in the state matrix with the
+corresponding location in goals matrix, and whenever a box is unmatched it the
+count to be returned
+'''
+def boxes(state, goals, corn=True):
     boxes = []
     for j in range(len(state)):             #check all the matrix for boxes
         for k in range(len(state[0])):
             if state[j][k] == 1:            #record the locations of all boxes
-                if is_cornered(state, goals, j, k):
+                if corn and is_cornered(state, goals, j, k):
                     return inf
                 boxes.append((j, k))
 
     unmatch = 0
-    for j, k in boxes:                         #check each box location if on goal
-        if not goals[j][k]:           #if box not on goal, increment count
+    for j, k in boxes:                      #check each box location if on goal
+        if not goals[j][k]:                 #if box not on goal, increment count
             unmatch += 1
     return unmatch                          #return number of unmatched goals
 
-def manhattan(state, goals):
+'''
+>>Manhattan distance between boxes/goals"
+Input: State matrix, goals matrix, boolean whether to use is_cornered refinements
+Output: Total minimum manhattan distance between all boxes and goals
+'''
+def manhattan(state, goals, corn=True):
     boxes = []
     for j in range(len(state)):             #check all the matrix for boxes
         for k in range(len(state[0])):
             if state[j][k] == 1:            #record the locations of all boxes
-                if is_cornered(state, goals, j, k):
+                if corn and is_cornered(state, goals, j, k):
                     return inf
                 boxes.append((j, k))
 
@@ -52,7 +65,7 @@ def manhattan(state, goals):
 def main():
     start_time = time.time()
 
-    test_m, test_g, _ = read()
+    test_m, test_g, _, _, _ = read()
 
     print(boxes(test_m, test_g))
     print(manhattan(test_m,test_g))
