@@ -4,14 +4,22 @@ from read import read
 from copy import deepcopy
 import time
 
-#find the position of player in state matrix
+'''
+>>Player position<<
+Input: state matrix
+Output: indicies to matrix entry where player is located
+'''
 def plyr_pos(state):
     for j in range(len(state)):                 #iterate rows
         for k in range(len(state[0])):          #iterate columns
             if state[j][k] == 2:                #if plyr found return indicies
                 return j, k
 
-#check if player is allowed to move to the left
+'''
+>>Is moving left allowed<<
+Input: state matrix, player x index, player y index
+Output: boolean
+'''
 def can_left(state, j, k):
     if k == 0:                                  #if at boundary
         return False
@@ -23,7 +31,11 @@ def can_left(state, j, k):
         return True
     return False                                #all other cases
 
-#check if player is allowed to move to the right
+'''
+>>Is moving right allowed<<
+Input: state matrix, player x index, player y index
+Output: boolean
+'''
 def can_right(state, j, k):
     if k == len(state[0])-1:                    #if at boundary
         return False
@@ -35,7 +47,11 @@ def can_right(state, j, k):
         return True
     return False                                #all other cases
 
-#check if player is allowed to move up
+'''
+>>Is moving up allowed<<
+Input: state matrix, player x index, player y index
+Output: boolean
+'''
 def can_up(state, j, k):
     if j == 0:                                  #if at boundary
         return False
@@ -47,7 +63,11 @@ def can_up(state, j, k):
         return True
     return False                                #all other cases
 
-#check if player is allowed to move down
+'''
+>>Is moving down allowed<<
+Input: state matrix, player x index, player y index
+Output: boolean
+'''
 def can_down(state, j, k):
     if j == len(state)-1:                       #if at boundary
         return False
@@ -59,51 +79,100 @@ def can_down(state, j, k):
         return True
     return False                                #all other cases
 
-#move to the left and return matrix
+'''
+>>Move left<<
+Input: state matrix, player x index, player y index, boolean whether to return
+cost
+Output: [cost], state after moving, change variable
+The cost return value is in brackets because it is only returned if asked for,
+The change variable is default to 9, but with be changed to 1 a box was moved
+into leftmost column.
+'''
 def mv_left(state, j, k, with_cost=False):
     cost = 1
+    change = 9
     if state[j][k-1] == 1:          #if box ahead, push box in blank position
         state[j][k-1], state[j][k-2] = state[j][k-2], state[j][k-1]
+        if k == 2:                   #for is_stuck refinemnt, if into border
+            change = 1
     state[j][k], state[j][k-1] = state[j][k-1], state[j][k]    #move player fwd
     if with_cost == False:
-        return state
+        return state, change
     else:
-        return cost, state
+        return cost, state, change
 
-#move to the right and return matrix
+'''
+>>Move right<<
+Input: state matrix, player x index, player y index, boolean whether to return
+cost
+Output: [cost], state after moving, change variable
+The cost return value is in brackets because it is only returned if asked for,
+The change variable is default to 9, but will be changed to 3 a box was moved
+into rightmost column.
+'''
 def mv_right(state, j, k, with_cost=False):
     cost = 1
+    change = 9
     if state[j][k+1] == 1:          #if box ahead, push box in blank position
         state[j][k+1], state[j][k+2] = state[j][k+2], state[j][k+1]
+        if k == len(state[0])-2:        #for is_stuck refinemnt, if into border
+            change = 3
     state[j][k], state[j][k+1] = state[j][k+1], state[j][k]    #move player fwd
     if with_cost == False:
-        return state
+        return state, change
     else:
-        return cost, state
+        return cost, state, change
 
-#move up and return matrix
+'''
+>>Move up<<
+Input: state matrix, player x index, player y index, boolean whether to return
+cost
+Output: [cost], state after moving, change variable
+The cost return value is in brackets because it is only returned if asked for,
+The change variable is default to 9, but will be changed to 0 a box was moved
+into topmost row.
+'''
 def mv_up(state, j, k, with_cost=False):
     cost = 1
+    change = 9
     if state[j-1][k] == 1:          #if box ahead, push box in blank position
         state[j-1][k], state[j-2][k] = state[j-2][k], state[j-1][k]
+        if j == 2:                  #for is_stuck refinemnt, if into border
+            change = 0
     state[j][k], state[j-1][k] = state[j-1][k], state[j][k]    #move player fwd
     if with_cost == False:
-        return state
+        return state, change
     else:
-        return cost, state
+        return cost, state, change
 
-#move down and return matrix
+'''
+>>Move down<<
+Input: state matrix, player x index, player y index, boolean whether to return
+cost
+Output: [cost], state after moving, change variable
+The cost return value is in brackets because it is only returned if asked for,
+The change variable is default to 9, but will be changed to 0 a box was moved
+into bottom most row.
+'''
 def mv_down(state, j, k, with_cost=False):
     cost = 1
+    change = 9
     if state[j+1][k] == 1:          #if box ahead, push box in blank position
         state[j+1][k], state[j+2][k] = state[j+2][k], state[j+1][k]
+        if j == len(state)-3:           #for is_stuck refinemnt, if into border
+            change = 2
     state[j][k], state[j+1][k] = state[j+1][k], state[j][k]    #move player fwd
     if with_cost == False:
-        return state
+        return state, change
     else:
-        return cost, state
+        return cost, state, change
 
 #takes in current state and returns the list of valid neighbors
+'''
+>>Neighbors of a state<<
+Input: state, and boolean whether to return cost as well
+Output: list of the neighbors of given state matrix [with cost]
+'''
 def neighbors(state, with_cost=False):
     j, k = plyr_pos(state)
     neighbors_l = []
@@ -133,6 +202,11 @@ def neighbors(state, with_cost=False):
             neighbors_l.append(mv_down(temp, j, k, with_cost=True))
     return neighbors_l
 
+'''
+>>Goal check<<
+Input: state matrix, goals matrix
+Output: boolean if state matrix is a goal matrix
+'''
 def is_goal(state, goals):
     for j in range(len(state)):             #check all the matrix for boxes
         for k in range(len(state[0])):
@@ -144,14 +218,14 @@ def is_goal(state, goals):
 
 def main():
     start_time = time.time()
-    test, _, _ = read()
+    test, _, _, _, _ = read()
 
     for row in test:
         print(row)
     print()
 
     neighbs = neighbors(test)
-    for mtx in neighbs:
+    for mtx,_ in neighbs:
         for row in mtx:
             print(row)
         print()
