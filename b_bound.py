@@ -5,8 +5,14 @@ from read import read
 from rank_unrank import rank, unrank, to_perm, to_matrix, get_info
 from mechanics import neighbors, is_goal
 from heuristics import boxes, manhattan
+from math import inf
 
-def b_bound0(start, goals, walls, depth,heuristic,cornered=True, verbose=False):
+def b_bound1(start, goals, walls, heuristic,bnd=inf,cornered=True, verbose=False):
+
+    soln = []
+    bound = bnd
+    cnt = 0
+
     frontier = []
     frontier.append([start])
 
@@ -14,22 +20,29 @@ def b_bound0(start, goals, walls, depth,heuristic,cornered=True, verbose=False):
         path = frontier.pop()
         last_matrix = path[-1]
         if is_goal(last_matrix, goals):
+            cnt = 1
             if verbose:
                 for matrices in path:
                     for line in matrices:
                         print(line)
                     print()
-            print("length\t:", len(path)-1)
-            return path
+            bound = len(path)-1
+            soln = path[:]
+        if len(path)-1 >= bound:
+            continue
         for next_matrix, _ in neighbors(last_matrix):
-            next_cost = heuristic(next_matrix, goals, corn=cornered)
             if next_matrix in path:
                 continue
             new_path = path + [next_matrix]
             frontier.append(new_path)
-    return None
+    print("length\t:", len(soln)-1)
+    return soln
 
-def b_bound(start, goals, walls, depth,heuristic, cornered=True, verbose=False):
+def b_bound2(start, goals, walls, heuristic, bnd=inf, cornered=True, verbose=False):
+
+    soln = []
+    bound = bnd
+    cnt = 0
 
     start_perm = to_perm(start)
     max_pot, length, type_count = get_info(start_perm)
@@ -38,10 +51,8 @@ def b_bound(start, goals, walls, depth,heuristic, cornered=True, verbose=False):
     frontier = []
     frontier.append([start_int])
 
-    is_visited = [False for i in range(max_pot)]    #initialize visited array
-    is_visited[start_int] = True                    #mark start as visited
-
     while frontier:
+
         path = frontier.pop()
         last_int = path[-1]
 
@@ -51,37 +62,29 @@ def b_bound(start, goals, walls, depth,heuristic, cornered=True, verbose=False):
         if is_goal(last_matrix, goals):
             if verbose:
                 print(path)
-            # print("length\t:", len(path)-1)
-            depth = len(path)-1
+            bound = len(path)-1
             soln = path[:]
-            # return path
-        if len(path)-1 >= depth:
+        if len(path)-1 >= bound:
             continue
         for next_matrix, _ in neighbors(last_matrix):
-
-            next_cost = heuristic(next_matrix, goals, corn=cornered)
 
             temp_perm = to_perm(next_matrix)
             int_next = rank(temp_perm, max_pot, length, type_count)
 
-            if last_int == 3080:
-                print(int_next)
-
-            if is_visited[int_next]:
+            if int_next in path:
                 continue
 
             new_path = path + [int_next]
-            is_visited[int_next] = True
             frontier.append(new_path)
-    print(len(soln))
-    return None
+    print("length", len(soln)-1)
+    return soln
 
 def main():
     start_time = time()
 
     test, goals, walls, _, _ = read()
-    b_bound0(test, goals, walls, 40, manhattan) #without pruning
-    # b_bound(test, goals, walls, 40, manhattan, verbose=True) #with pruning
+    b_bound1(test, goals, walls, manhattan) #without pruning
+    # b_bound2(test, goals, walls, manhattan) #with pruning
 
     print("--- %s seconds ---" % (time() - start_time))
 
